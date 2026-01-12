@@ -212,9 +212,9 @@ export default function App() {
     socket.emit("START_REQUEST");
 
     // Request fullscreen
-    // document.documentElement.requestFullscreen().catch(err => {
-    //   console.log("Fullscreen blocked:", err);
-    // });
+    document.documentElement.requestFullscreen().catch(err => {
+      console.log("Fullscreen blocked:", err);
+    });
   };
 
   const handleIntroFinish = () => {

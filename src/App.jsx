@@ -154,18 +154,26 @@ function StartScreen({ onStart }) {
 export default function App() {
   const [stage, setStage] = useState('start'); // 'start', 'intro', 'countdown'
   const [startTime, setStartTime] = useState(null);
-
-  useEffect(() => {
+useEffect(() => {
   socket.on("connect", () => {
     console.log("✅ Socket connected");
   });
 
-  socket.on("hackathon-started", (serverTime) => {
-    console.log("🔥 Hackathon started at", serverTime);
-
-    setStartTime(new Date(serverTime));
+ useEffect(() => {
+  socket.on("START_EVENT", ({ startTime }) => {
+    console.log("🔥 START_EVENT received", startTime);
+    setStartTime(new Date(startTime));
     setStage("intro");
   });
+
+  socket.on("SYNC_RUNNING", ({ startTime }) => {
+    console.log("🔄 SYNC_RUNNING received", startTime);
+    setStartTime(new Date(startTime));
+    setStage("countdown");
+  });
+
+  return () => socket.off();
+}, []);
 
   return () => {
     socket.off("hackathon-started");

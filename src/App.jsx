@@ -2,18 +2,19 @@ import { useState, useEffect, useRef } from 'react';
 import { Play, Maximize2 } from 'lucide-react';
 import './App.css';
 import intro from "./assets/intro.mp4";
-// Mock socket for demo - replace with your actual socket import
-const socket = {
-  on: (event, callback) => {
-    console.log(`Listening for: ${event}`);
-  },
-  off: (event) => {
-    console.log(`Stopped listening: ${event}`);
-  },
-  emit: (event, data) => {
-    console.log(`Emitting: ${event}`, data);
-  }
-};
+import socket from "./socket";
+// // Mock socket for demo - replace with your actual socket import
+// const socket = {
+//   on: (event, callback) => {
+//     console.log(`Listening for: ${event}`);
+//   },
+//   off: (event) => {
+//     console.log(`Stopped listening: ${event}`);
+//   },
+//   emit: (event, data) => {
+//     console.log(`Emitting: ${event}`, data);
+//   }
+// };
 
 function IntroAnimation({ onFinish, show }) {
   const videoRef = useRef(null);

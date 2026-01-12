@@ -1,8 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { Play, Maximize2 } from 'lucide-react';
 import './App.css';
-import socket from "./socket";
 import intro from "./assets/intro.mp4";
+// Mock socket for demo - replace with your actual socket import
+const socket = {
+  on: (event, callback) => {
+    console.log(`Listening for: ${event}`);
+  },
+  off: (event) => {
+    console.log(`Stopped listening: ${event}`);
+  },
+  emit: (event, data) => {
+    console.log(`Emitting: ${event}`, data);
+  }
+};
+
 function IntroAnimation({ onFinish, show }) {
   const videoRef = useRef(null);
   
@@ -21,11 +33,12 @@ function IntroAnimation({ onFinish, show }) {
       <video
         ref={videoRef}
         onEnded={onFinish}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover bg-black"
         playsInline
         muted
       >
-        <source src={intro} type="video/mp4" />
+        {/* Replace with your actual video source */}
+        <source src="/intro.mp4" type="video/mp4" />
       </video>
     </div>
   );
@@ -57,7 +70,6 @@ function Countdown({ startTime, show }) {
 
     return () => clearInterval(interval);
   }, [startTime]);
-
 
   return (
     <div 
@@ -154,41 +166,54 @@ function StartScreen({ onStart }) {
 export default function App() {
   const [stage, setStage] = useState('start'); // 'start', 'intro', 'countdown'
   const [startTime, setStartTime] = useState(null);
-useEffect(() => {
-  socket.on("connect", () => {
-    console.log("✅ Socket connected");
-  });
 
- useEffect(() => {
-  socket.on("START_EVENT", ({ startTime }) => {
-    console.log("🔥 START_EVENT received", startTime);
-    setStartTime(new Date(startTime));
-    setStage("intro");
-  });
+  // Single useEffect for all socket listeners
+  useEffect(() => {
+    // Connection event
+    socket.on("connect", () => {
+      console.log("✅ Socket connected");
+    });
 
-  socket.on("SYNC_RUNNING", ({ startTime }) => {
-    console.log("🔄 SYNC_RUNNING received", startTime);
-    setStartTime(new Date(startTime));
-    setStage("countdown");
-  });
+    // Start event - triggers intro animation
+    socket.on("START_EVENT", ({ startTime }) => {
+      console.log("🔥 START_EVENT received", startTime);
+      setStartTime(new Date(startTime));
+      setStage("intro");
+    });
 
-  return () => socket.off();
-}, []);
+    // Sync event - for clients joining after start
+    socket.on("SYNC_RUNNING", ({ startTime }) => {
+      console.log("🔄 SYNC_RUNNING received", startTime);
+      setStartTime(new Date(startTime));
+      setStage("countdown");
+    });
 
-  return () => {
-    socket.off("hackathon-started");
-  };
-}, []);
+    // Reset event - returns to start screen
+    socket.on("RESET_EVENT", () => {
+      console.log("🔄 RESET_EVENT received");
+      setStage("start");
+      setStartTime(null);
+    });
 
+    // Cleanup all listeners on unmount
+    return () => {
+      socket.off("connect");
+      socket.off("START_EVENT");
+      socket.off("SYNC_RUNNING");
+      socket.off("RESET_EVENT");
+    };
+  }, []);
 
   const handleStart = () => {
-   console.log("▶️ Start clicked (HOD)");
+    console.log("▶️ Start clicked");
 
-  socket.emit("start-hackathon"); // 🔥 THIS LINE WAS MISSING
+    // Emit the correct event name that matches backend
+    socket.emit("START_REQUEST");
 
-  document.documentElement.requestFullscreen().catch(err => {
-    console.log("Fullscreen blocked:", err);
-  });
+    // Request fullscreen
+    document.documentElement.requestFullscreen().catch(err => {
+      console.log("Fullscreen blocked:", err);
+    });
   };
 
   const handleIntroFinish = () => {

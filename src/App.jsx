@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Play, Maximize2 } from 'lucide-react';
 import './App.css';
+import socket from "./socket";
 import intro from "./assets/intro.mp4";
 function IntroAnimation({ onFinish, show }) {
   const videoRef = useRef(null);
@@ -154,10 +155,30 @@ export default function App() {
   const [stage, setStage] = useState('start'); // 'start', 'intro', 'countdown'
   const [startTime, setStartTime] = useState(null);
 
+  useEffect(() => {
+  socket.on("connect", () => {
+    console.log("✅ Socket connected");
+  });
+
+  socket.on("hackathon-started", (serverTime) => {
+    console.log("🔥 Hackathon started at", serverTime);
+
+    setStartTime(new Date(serverTime));
+    setStage("intro");
+  });
+
+  return () => {
+    socket.off("hackathon-started");
+  };
+}, []);
+
+
   const handleStart = () => {
-    setStartTime(new Date());
-    setStage('intro');
-    document.documentElement.requestFullscreen().catch(err => {
+   console.log("▶️ Start clicked (HOD)");
+
+  socket.emit("start-hackathon"); // 🔥 THIS LINE WAS MISSING
+
+  document.documentElement.requestFullscreen().catch(err => {
     console.log("Fullscreen blocked:", err);
   });
   };

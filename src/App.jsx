@@ -39,7 +39,7 @@ function IntroAnimation({ onFinish, show }) {
         muted
       >
         {/* Replace with your actual video source */}
-        <source src="/intro.mp4" type="video/mp4" />
+        <source src={intro} type="video/mp4" />
       </video>
     </div>
   );

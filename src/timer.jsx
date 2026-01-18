@@ -47,9 +47,7 @@ function Countdown({ startTime, show }) {
     const interval = setInterval(() => {
       const now = Date.now();
       // YOUR ORIGINAL LOGIC: Calculate elapsed since start
-      const start = startTime ? new Date(startTime).getTime() : now;
-const elapsed = now - start;
-
+      const elapsed = now - new Date(startTime).getTime();
       // YOUR ORIGINAL LOGIC: 24 Hour Countdown
       const remaining = (24 * 60 * 60 * 1000) - elapsed;
 

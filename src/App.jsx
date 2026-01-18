@@ -1,7 +1,7 @@
 import React from "react";
 import GlobalBackground from "./GlobalBackground";
 import Timer from "./timer";
-import "./app.css";
+import "./App.css";
 
 function App() {
   return (

@@ -1,7 +1,196 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play } from 'lucide-react';
-import intro from "./assets/intro.mp4";
+import intro from "./assets/video.mp4";
 import socket from "./socket";
+
+// --- CELEBRATION COMPONENT ---
+function CelebrationActivated({ show }) {
+  if (!show) return null;
+
+  return (
+    <div className="celebration-overlay">
+      <div className="celebration-frame">
+        {/* Confetti - Now varying shapes and sizes for better visual */}
+        {[...Array(150)].map((_, i) => {
+          const randomX = Math.random() * 400 - 200;
+          const randomRotate = Math.random() * 1080;
+          const size = Math.random() * 10 + 6; // Size between 6px and 16px
+          const isCircle = Math.random() > 0.6; // 40% chance of being a circle
+          const opacity = Math.random() * 0.5 + 0.5; // Varying opacity for depth
+
+          return (
+            <div
+              key={`confetti-${i}`}
+              className="confetti"
+              style={{
+                left: `${Math.random() * 100}%`,
+                width: `${size}px`,
+                height: `${size}px`,
+                borderRadius: isCircle ? '50%' : '3px',
+                opacity: opacity,
+                animationDelay: `${Math.random() * 2.5}s`,
+                animationDuration: `${3.5 + Math.random() * 4}s`,
+                "--random-x": randomX,
+                "--random-rotate": randomRotate,
+              }}
+            />
+          );
+        })}
+
+        {/* Sparkles - Updated to blue */}
+        {[...Array(70)].map((_, i) => (
+          <div
+            key={`sparkle-${i}`}
+            className="sparkle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              transform: `scale(${Math.random()})`, // Slight starting size variation
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${1 + Math.random() * 2}s`,
+            }}
+          />
+        ))}
+
+        {/* Center Message - Updated to Blue Theme */}
+        <div className="success-message">
+          <div className="success-icon">✓</div>
+          <h2 className="success-title">CODEFUSION ACTIVATED</h2>
+          <p className="success-subtitle">Timer Started Successfully</p>
+        </div>
+      </div>
+
+      {/* CSS STYLES */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+        .celebration-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          background: rgba(0, 10, 30, 0.9); /* Darker blue-black background */
+          backdrop-filter: blur(10px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          animation: fadeIn 0.5s ease-out;
+          font-family: 'Orbitron', sans-serif; /* Ensure font matches */
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .celebration-frame {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          /* Radial gradient for depth centered on the message */
+          background: radial-gradient(circle at center, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+        }
+
+        /* Confetti - Blue/Cyan Gradients */
+        .confetti {
+          position: absolute;
+          top: -50px;
+          /* Width/Height/Border-radius handled by inline styles now */
+          background: linear-gradient(135deg, #3b82f6, #22d3ee); /* Blue to Cyan */
+          box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); /* Blue glow */
+          animation: confettiFall ease-out forwards;
+          will-change: transform, opacity;
+        }
+
+        @keyframes confettiFall {
+          0% {
+            transform: translateX(0) rotate(0deg) scale(0.8);
+          }
+          100% {
+            transform:
+              translateX(calc(var(--random-x) * 2px)) /* Increased spread slightly */
+              rotate(calc(var(--random-rotate) * 1deg))
+              scale(1);
+            top: 110%;
+          }
+        }
+
+        /* Sparkle - Blue */
+        .sparkle {
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          background: #60a5fa; /* Bright Blue */
+          border-radius: 50%;
+          animation: sparkle-pulse 2s ease-in-out infinite;
+          box-shadow: 0 0 15px rgba(96, 165, 250, 0.9); /* Bright blue glow */
+        }
+
+        @keyframes sparkle-pulse {
+          0%,100% { transform: scale(0); opacity: 0; }
+          50% { transform: scale(2.5); opacity: 1; } /* Slightly larger pulse */
+        }
+
+        /* Center Success */
+        .success-message {
+          z-index: 10;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1.5rem;
+          animation: zoomInEnrty 0.8s cubic-bezier(.34,1.56,.64,1);
+        }
+
+        @keyframes zoomInEnrty {
+          from { transform: scale(0.5); opacity: 0; filter: blur(10px); }
+          to { transform: scale(1); opacity: 1; filter: blur(0); }
+        }
+
+        .success-icon {
+          width: 120px;
+          height: 120px;
+          border-radius: 50%;
+          /* Blue to Cyan Gradient */
+          background: linear-gradient(135deg, #2563eb, #22d3ee);
+          color: white;
+          font-size: 4.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          /* Strong Blue Shadow */
+          box-shadow: 0 0 60px rgba(59, 130, 246, 0.7), inset 0 0 20px rgba(255,255,255,0.3);
+          animation: iconPulse 2s infinite ease-in-out;
+          border: 3px solid rgba(255,255,255,0.1);
+        }
+
+        @keyframes iconPulse {
+          0%,100% { transform: scale(1); box-shadow: 0 0 60px rgba(59, 130, 246, 0.7); }
+          50% { transform: scale(1.05); box-shadow: 0 0 80px rgba(59, 130, 246, 0.9); }
+        }
+
+        .success-title {
+          font-size: 3.5rem;
+          font-weight: 800;
+          letter-spacing: 0.15em;
+          color: #ffffff;
+          /* Blue text shadow glow */
+          text-shadow: 0 0 40px rgba(59, 130, 246, 0.8), 0 0 10px rgba(59, 130, 246, 0.8);
+          text-align: center;
+        }
+
+        .success-subtitle {
+          font-size: 1.5rem;
+          color: #93c5fd; /* Light blue text */
+          text-align: center;
+          letter-spacing: 0.05em;
+        }
+      `}</style>
+    </div>
+  );
+}
 
 // --- INTRO ANIMATION (Your Original) ---
 function IntroAnimation({ onFinish, show }) {
@@ -86,15 +275,15 @@ function Countdown({ startTime, show }) {
         {/* Header - Omnitrix Style */}
         <div className="space-y-4 text-center">
           <h1
-  className="
-    text-3xl md:text-5xl lg:text-6xl
-    font-bold text-white
-    ml-6 md:ml-10 lg:ml-14
-  "
-  style={{ fontFamily: 'Orbitron, monospace', letterSpacing: '0.15em' }}
->
-  CODEFUSION 2026
-</h1>
+            className="
+              text-3xl md:text-5xl lg:text-6xl
+              font-bold text-white
+              ml-6 md:ml-10 lg:ml-14
+            "
+            style={{ fontFamily: 'Orbitron, monospace', letterSpacing: '0.15em' }}
+          >
+            CODEFUSION 2026
+          </h1>
 
 
           <div className="h-1 w-24 md:w-32 mx-auto bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
@@ -184,58 +373,58 @@ function Countdown({ startTime, show }) {
 
       {/* Fullscreen Toggle Button - Omnitrix Style */}
       <button
-  onClick={() => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      document.documentElement.requestFullscreen().catch(err => {
-        console.log("Fullscreen blocked:", err);
-      });
-    }
-  }}
-  className="fixed bottom-4 right-4 z-50 p-4 rounded-full border-2 border-cyan-500 bg-transparent hover:bg-cyan-500/10 transition-all duration-300 flex items-center justify-center w-16 h-16"
-  title={document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen"}
->
-  {!document.fullscreenElement ? (
-    /* ENTER FULLSCREEN ICON */
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="28"
-      height="28"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-cyan-400"
-    >
-      <path d="M8 3H5a2 2 0 0 0-2 2v3" />
-      <path d="M16 3h3a2 2 0 0 1 2 2v3" />
-      <path d="M21 16v3a2 2 0 0 1-2 2h-3" />
-      <path d="M3 16v3a2 2 0 0 0 2 2h3" />
-    </svg>
-  ) : (
-    /* EXIT FULLSCREEN ICON */
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="28"
-      height="28"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-cyan-400"
-    >
-      <path d="M9 3v3a2 2 0 0 1-2 2H4" />
-      <path d="M15 3v3a2 2 0 0 0 2 2h3" />
-      <path d="M15 21v-3a2 2 0 0 1 2-2h3" />
-      <path d="M9 21v-3a2 2 0 0 0-2-2H4" />
-    </svg>
-  )}
-</button>
+        onClick={() => {
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+          } else {
+            document.documentElement.requestFullscreen().catch(err => {
+              console.log("Fullscreen blocked:", err);
+            });
+          }
+        }}
+        className="fixed bottom-4 right-4 z-50 p-4 rounded-full border-2 border-cyan-500 bg-transparent hover:bg-cyan-500/10 transition-all duration-300 flex items-center justify-center w-16 h-16"
+        title={document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen"}
+      >
+        {!document.fullscreenElement ? (
+          /* ENTER FULLSCREEN ICON */
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-cyan-400"
+          >
+            <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+            <path d="M16 3h3a2 2 0 0 1 2 2v3" />
+            <path d="M21 16v3a2 2 0 0 1-2 2h-3" />
+            <path d="M3 16v3a2 2 0 0 0 2 2h3" />
+          </svg>
+        ) : (
+          /* EXIT FULLSCREEN ICON */
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-cyan-400"
+          >
+            <path d="M9 3v3a2 2 0 0 1-2 2H4" />
+            <path d="M15 3v3a2 2 0 0 0 2 2h3" />
+            <path d="M15 21v-3a2 2 0 0 1 2-2h3" />
+            <path d="M9 21v-3a2 2 0 0 0-2-2H4" />
+          </svg>
+        )}
+      </button>
 
 
       {/* STYLES FROM OMNITRIX TIMER (ADAPTED) */}
@@ -333,6 +522,7 @@ function Countdown({ startTime, show }) {
 }
 
 // --- START SCREEN (Your Original) ---
+
 function StartScreen({ onStart }) {
   const particles = React.useMemo(() => 
     [...Array(50)].map((_, i) => ({
@@ -362,32 +552,37 @@ function StartScreen({ onStart }) {
         ))}
       </div>
 
-      <div className="relative z-10 text-center space-y-12 px-4">
-        <div className="space-y-4">
-          <h1 className="text-7xl md:text-8xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
+      <div className="relative z-10 text-center space-y-16 px-4">
+        <div className="space-y-6">
+          <h1 
+            className="text-6xl md:text-7xl lg:text-8xl font-bold text-white"
+            style={{ fontFamily: 'Orbitron, monospace', letterSpacing: '0.15em' }}
+          >
             CODEFUSION
           </h1>
-          <p className="text-2xl md:text-3xl text-blue-300 font-light tracking-widest">
-            24 HOUR CHALLENGE
-          </p>
-          <div className="h-1 w-64 mx-auto bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+          <h2 
+            className="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-400"
+            style={{ fontFamily: 'Orbitron, monospace', letterSpacing: '0.1em' }}
+          >
+            2026
+          </h2>
+          <div className="h-1 w-32 md:w-40 mx-auto bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
         </div>
 
-        <button
-          onClick={onStart}
-          className="group relative px-12 py-6 text-2xl font-bold text-white bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full overflow-hidden transition-all duration-300 hover:scale-110 hover:shadow-[0_0_50px_rgba(59,130,246,0.6)]"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="relative flex items-center gap-3">
-            <Play className="fill-current" size={28} />
-            <span>START TIMER</span>
-          </div>
-        </button>
-
-        <div className="flex items-center justify-center gap-3 text-blue-400/70">
-          <div className="h-px w-16 bg-gradient-to-r from-transparent to-blue-400/50"></div>
-          <span className="text-sm tracking-wider">CLICK TO BEGIN</span>
-          <div className="h-px w-16 bg-gradient-to-l from-transparent to-blue-400/50"></div>
+        <div className="group relative inline-block">
+          {/* Transparent glow background */}
+          <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-2xl group-hover:from-cyan-500/40 group-hover:to-blue-500/40 transition-all duration-300"></div>
+          
+          {/* Button */}
+          <button
+            onClick={onStart}
+            className="relative px-10 py-4 text-xl md:text-2xl font-bold text-white bg-transparent border-2 border-cyan-500 rounded-full overflow-hidden transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_30px_rgba(34,211,238,0.6)] cursor-pointer"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
+            <div className="relative flex items-center justify-center">
+              <span style={{ fontFamily: 'Orbitron, monospace', letterSpacing: '0.05em' }}>ACTIVATE</span>
+            </div>
+          </button>
         </div>
       </div>
     </div>
@@ -396,7 +591,7 @@ function StartScreen({ onStart }) {
 
 // --- MAIN APP (Your Original Logic) ---
 export default function App() {
-  const [stage, setStage] = useState('start'); // 'start', 'intro', 'countdown'
+  const [stage, setStage] = useState('start'); // 'start', 'intro', 'celebration', 'countdown'
   const [startTime, setStartTime] = useState(null);
 
   // Single useEffect for all socket listeners
@@ -449,8 +644,20 @@ export default function App() {
   };
 
   const handleIntroFinish = () => {
+    setStage('celebration');
+  };
+
+  const handleCelebrationFinish = () => {
     setStage('countdown');
   };
+
+  // Auto-transition from celebration after 4 seconds
+  useEffect(() => {
+    if (stage === 'celebration') {
+      const timer = setTimeout(handleCelebrationFinish, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [stage]);
 
   return (
     <div className="w-screen h-screen overflow-hidden">
@@ -458,6 +665,9 @@ export default function App() {
       <IntroAnimation 
         show={stage === 'intro'} 
         onFinish={handleIntroFinish} 
+      />
+      <CelebrationActivated 
+        show={stage === 'celebration'} 
       />
       <Countdown 
         startTime={startTime || new Date()} 

@@ -141,12 +141,17 @@ function CelebrationActivated({ show }) {
           flex-direction: column;
           align-items: center;
           gap: 1.5rem;
-          animation: zoomInEnrty 0.8s cubic-bezier(.34,1.56,.64,1);
+          animation: zoomInEnrty 0.8s cubic-bezier(.34,1.56,.64,1), holdPause 2s ease-in-out 0.8s;
         }
 
         @keyframes zoomInEnrty {
           from { transform: scale(0.5); opacity: 0; filter: blur(10px); }
           to { transform: scale(1); opacity: 1; filter: blur(0); }
+        }
+
+        @keyframes holdPause {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1); opacity: 1; }
         }
 
         .success-icon {
@@ -651,10 +656,10 @@ export default function App() {
     setStage('countdown');
   };
 
-  // Auto-transition from celebration after 4 seconds
+  // Auto-transition from celebration after 8 seconds (2 sec pause + 6 sec animation)
   useEffect(() => {
     if (stage === 'celebration') {
-      const timer = setTimeout(handleCelebrationFinish, 4000);
+      const timer = setTimeout(handleCelebrationFinish, 8000);
       return () => clearTimeout(timer);
     }
   }, [stage]);

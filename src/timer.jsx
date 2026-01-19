@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Play } from 'lucide-react';
 import intro from "./assets/video.mp4";
 import socket from "./socket";
+import header from "./assets/header.png";
 
 // --- CELEBRATION COMPONENT ---
 function CelebrationActivated({ show }) {
@@ -279,16 +280,15 @@ function Countdown({ startTime, show }) {
         
         {/* Header - Omnitrix Style */}
         <div className="space-y-4 text-center">
-          <h1
-            className="
-              text-3xl md:text-5xl lg:text-6xl
-              font-bold text-white
-              ml-6 md:ml-10 lg:ml-14
-            "
-            style={{ fontFamily: 'Orbitron, monospace', letterSpacing: '0.15em' }}
-          >
-            CODEFUSION 2026
-          </h1>
+       <img
+    src={header}
+    alt="CODEFUSION 2026"
+    className="
+      ml-6 md:ml-10 lg:ml-14
+      w-[360px] md:w-[560px] lg:w-[760px]
+    "
+  />
+
 
 
           <div className="h-1 w-24 md:w-32 mx-auto bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>

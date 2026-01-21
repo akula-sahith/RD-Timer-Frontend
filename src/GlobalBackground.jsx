@@ -231,7 +231,7 @@ const GlobalBackground = () => {
         ))}
       </div>
 
-      {/* Fast particles */}
+      Fast particles
       <div className="absolute inset-0">
         {fastParticles.map((p) => (
           <div

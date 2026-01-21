@@ -1,21 +1,26 @@
 import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import GlobalBackground from "./GlobalBackground";
+import Home from "./home";
 import Timer from "./timer";
+import CSETimer from "./csetimer";
 import "./App.css";
 
 function App() {
   return (
-    <div className="relative w-full h-screen overflow-hidden">
-      {/* Background */}
-      <GlobalBackground />
+    <BrowserRouter>
+      <div className="relative w-full h-screen overflow-hidden">
+        {/* Background */}
+        <GlobalBackground />
 
-      {/* Home Page Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full gap-6">
-        
-
-        <Timer />
+        {/* Routes */}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/it-timer" element={<Timer />} />
+          <Route path="/cse-timer" element={<CSETimer />} />
+        </Routes>
       </div>
-    </div>
+    </BrowserRouter>
   );
 }
 

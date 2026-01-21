@@ -602,10 +602,7 @@ export default function App() {
   // Single useEffect for all socket listeners
   useEffect(() => {
     // Connection event
-    socket.on("connect", () => {
-      console.log("✅ Socket connected");
-    });
-
+  socket.emit("join-room", "cse");
     // Start event - triggers intro animation
     socket.on("START_EVENT", ({ startTime }) => {
       console.log("🔥 START_EVENT received", startTime);
@@ -640,7 +637,7 @@ export default function App() {
     console.log("▶️ Start clicked");
 
     // Emit the correct event name that matches backend
-    socket.emit("START_REQUEST");
+    socket.emit("START_REQUEST","cse");
 
     // Request fullscreen
     document.documentElement.requestFullscreen().catch(err => {

@@ -229,11 +229,16 @@ function Countdown({ startTime, show, onAdBreak }) {
         return;
       }
 
-      // Check for ad break every 15 minutes
+      // Check for ad break every 15 minutes (starting from 15 min, not 0)
+      // currentAdSlot will be: 0 at 0-14:59, 1 at 15:00-29:59, 2 at 30:00-44:59, etc.
       const currentAdSlot = Math.floor(elapsed / AD_INTERVAL);
-      if (currentAdSlot > lastAdCheckRef.current && currentAdSlot < AD_VIDEOS.length) {
+      
+      // Trigger ad when we enter a new 15-min slot (but not at slot 0, which is first 15 minutes)
+      if (currentAdSlot > 0 && currentAdSlot > lastAdCheckRef.current && currentAdSlot <= AD_VIDEOS.length) {
         lastAdCheckRef.current = currentAdSlot;
-        onAdBreak(currentAdSlot);
+        // Pick random ad from available videos
+        const randomAdIndex = Math.floor(Math.random() * AD_VIDEOS.length);
+        onAdBreak(randomAdIndex);
       }
 
       const hrs = Math.floor(remaining / 3600000);

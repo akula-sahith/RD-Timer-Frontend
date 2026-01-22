@@ -597,7 +597,7 @@ export default function App() {
   // Auto-transition from celebration after 8 seconds (2 sec pause + 6 sec animation)
   useEffect(() => {
     if (stage === 'celebration') {
-      const timer = setTimeout(handleCelebrationFinish, 5000);
+      const timer = setTimeout(handleCelebrationFinish, 4000);
       return () => clearTimeout(timer);
     }
   }, [stage]);

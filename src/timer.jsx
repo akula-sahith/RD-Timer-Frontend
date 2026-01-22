@@ -178,36 +178,45 @@ function IntroAnimation({ onFinish, show }) {
 // --- AD BREAK COMPONENT ---
 function AdBreak({ videoSrc, show, onFinish }) {
   const videoRef = useRef(null);
-  
+
   useEffect(() => {
     if (show && videoRef.current) {
-      videoRef.current.play().catch(err => console.log('Ad video play failed:', err));
+      const video = videoRef.current;
+      video.currentTime = 0;   // ⬅️ reset
+      video.loop = false;      // ⬅️ NO LOOP
+      video.play().catch(() => {});
     }
-  }, [show]);
+  }, [show, videoSrc]);
+
+  const handleEnded = () => {
+    const video = videoRef.current;
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+    }
+    onFinish(); // ⬅️ return to countdown
+  };
 
   return (
-    <div 
-      className={`fixed inset-0 z-50 transition-opacity duration-1000 ${
-        show ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      }`}
-    >
+    <div className={`fixed inset-0 z-50 ${show ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
       <video
         ref={videoRef}
-        onEnded={onFinish}
+        onEnded={handleEnded}
         className="w-full h-full object-cover bg-black"
         playsInline
         muted
+        preload="auto"
       >
         <source src={videoSrc} type="video/mp4" />
       </video>
-      
-      {/* Ad indicator */}
-      <div className="absolute top-4 right-4 bg-black/70 text-cyan-400 px-4 py-2 rounded-full text-sm font-semibold border border-cyan-500/50">
-        <span style={{ fontFamily: 'Orbitron, monospace', letterSpacing: '0.05em' }}>AD BREAK</span>
+
+      <div className="absolute top-4 right-4 bg-black/70 text-cyan-400 px-4 py-2 rounded-full">
+        AD BREAK
       </div>
     </div>
   );
 }
+
 
 // --- CIRCULAR TIMER COMPONENT ---
 function Countdown({ startTime, show, onAdBreak }) {

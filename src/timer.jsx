@@ -178,18 +178,17 @@ function IntroAnimation({ onFinish, show }) {
 // --- AD BREAK COMPONENT (FIXED) ---
 function AdBreak({ videoSrc, show, onFinish }) {
   const videoRef = useRef(null);
-  const hasPlayedRef = useRef(false);
+  const hasEndedRef = useRef(false);
 
   useEffect(() => {
     if (show && videoRef.current) {
       const video = videoRef.current;
       
-      // Reset the video completely
-      video.pause();
-      video.currentTime = 0;
-      hasPlayedRef.current = false;
+      // Reset state
+      hasEndedRef.current = false;
       
-      // Play the video
+      // Load and play the video
+      video.load(); // Force reload the video
       video.play().catch((err) => {
         console.log('Ad video play failed:', err);
       });
@@ -197,32 +196,25 @@ function AdBreak({ videoSrc, show, onFinish }) {
   }, [show, videoSrc]);
 
   const handleEnded = () => {
-    if (hasPlayedRef.current) return; // Prevent multiple calls
+    // Prevent multiple calls
+    if (hasEndedRef.current) return;
+    hasEndedRef.current = true;
     
-    hasPlayedRef.current = true;
+    console.log("📺 Ad video ended, going back to timer");
+    
     const video = videoRef.current;
-    
     if (video) {
       video.pause();
       video.currentTime = 0;
     }
     
-    onFinish(); // Return to countdown
+    onFinish();
   };
-
-  // Also handle when video is not showing - pause it
-  useEffect(() => {
-    if (!show && videoRef.current) {
-      const video = videoRef.current;
-      video.pause();
-      video.currentTime = 0;
-    }
-  }, [show]);
 
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-50 opacity-100">
+    <div className="fixed inset-0 z-50">
       <video
         ref={videoRef}
         onEnded={handleEnded}
@@ -242,8 +234,8 @@ function AdBreak({ videoSrc, show, onFinish }) {
 }
 
 
-// --- CIRCULAR TIMER COMPONENT ---
-function Countdown({ startTime, show, onAdBreak }) {
+// --- CIRCULAR TIMER COMPONENT (FIXED) ---
+function Countdown({ startTime, show, onAdBreak, isAdPlaying }) {
   const [timeLeft, setTimeLeft] = useState({ hrs: 0, mins: 0, secs: 0 });
   const [isEnded, setIsEnded] = useState(false);
   const lastAdCheckRef = useRef(0);
@@ -262,16 +254,17 @@ function Countdown({ startTime, show, onAdBreak }) {
         return;
       }
 
-      // Check for ad break every 15 minutes (starting from 15 min, not 0)
-      // currentAdSlot will be: 0 at 0-14:59, 1 at 15:00-29:59, 2 at 30:00-44:59, etc.
-      const currentAdSlot = Math.floor(elapsed / AD_INTERVAL);
-      
-      // Trigger ad when we enter a new 15-min slot (but not at slot 0, which is first 15 minutes)
-      if (currentAdSlot > 0 && currentAdSlot > lastAdCheckRef.current && currentAdSlot <= AD_VIDEOS.length) {
-        lastAdCheckRef.current = currentAdSlot;
-        // Pick random ad from available videos
-        const randomAdIndex = Math.floor(Math.random() * AD_VIDEOS.length);
-        onAdBreak(randomAdIndex);
+      // Only check for ad breaks if NOT currently playing an ad
+      if (!isAdPlaying) {
+        const currentAdSlot = Math.floor(elapsed / AD_INTERVAL);
+        
+        // Trigger ad when we enter a new slot (but not at slot 0)
+        if (currentAdSlot > 0 && currentAdSlot !== lastAdCheckRef.current && currentAdSlot <= AD_VIDEOS.length) {
+          console.log(`📺 Triggering ad slot ${currentAdSlot}`);
+          lastAdCheckRef.current = currentAdSlot;
+          const randomAdIndex = Math.floor(Math.random() * AD_VIDEOS.length);
+          onAdBreak(randomAdIndex);
+        }
       }
 
       const hrs = Math.floor(remaining / 3600000);
@@ -282,7 +275,7 @@ function Countdown({ startTime, show, onAdBreak }) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [startTime, onAdBreak]);
+  }, [startTime, onAdBreak, isAdPlaying]);
 
   const calculateOffset = (value, maxValue) => {
     const progress = value / maxValue;
@@ -672,7 +665,7 @@ export default function App() {
   };
 
   const handleAdBreak = (adSlot) => {
-    console.log("📺 Ad break triggered:", adSlot);
+    console.log("📺 Ad break triggered, slot:", adSlot);
     setCurrentAdIndex(adSlot);
     setStage('ad');
   };
@@ -715,6 +708,7 @@ export default function App() {
           startTime={countdownStartTime}
           show={stage === 'countdown'}
           onAdBreak={handleAdBreak}
+          isAdPlaying={stage === 'ad'}
         />
       )}
 

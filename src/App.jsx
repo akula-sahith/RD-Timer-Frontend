@@ -19,7 +19,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/it-timer" element={<Timer />} />
           <Route path="/cse-timer" element={<CSETimer />} />
-          <Route path="/ecetimer" element={<Ecetimer />} />
+          <Route path="/ece--timer" element={<Ecetimer />} />
         </Routes>
       </div>
     </BrowserRouter>

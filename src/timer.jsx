@@ -10,7 +10,7 @@ import header from "./assets/header.png";
 
 // Ad videos array
 const AD_VIDEOS = [ad1, ad2, ad3, ad4];
-const AD_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
+const AD_INTERVAL = 1 * 60 * 1000; // 15 minutes in milliseconds
 
 // --- CELEBRATION COMPONENT ---
 function CelebrationActivated({ show }) {

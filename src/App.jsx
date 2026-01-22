@@ -5,6 +5,7 @@ import Home from "./home";
 import Timer from "./timer";
 import CSETimer from "./csetimer";
 import "./App.css";
+import Ecetimer from "./ecetimer";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/it-timer" element={<Timer />} />
           <Route path="/cse-timer" element={<CSETimer />} />
+          <Route path="/ece-timer" element={<Ecetimer />} />
         </Routes>
       </div>
     </BrowserRouter>

@@ -603,19 +603,27 @@ export default function App() {
   }, [stage]);
 
   return (
-    <div className="w-screen h-screen overflow-hidden">
-      {stage === 'start' && <StartScreen onStart={handleStart} />}
-      <IntroAnimation 
-        show={stage === 'intro'} 
-        onFinish={handleIntroFinish} 
-      />
-      <CelebrationActivated 
-        show={stage === 'celebration'} 
-      />
+  <div className="w-screen h-screen overflow-hidden">
+    
+    {stage === 'start' && <StartScreen onStart={handleStart} />}
+
+    <IntroAnimation 
+      show={stage === 'intro'} 
+      onFinish={handleIntroFinish} 
+    />
+
+    <CelebrationActivated 
+      show={stage === 'celebration'} 
+    />
+
+    {stage === 'countdown' && startTime && (
       <Countdown 
-        startTime={startTime || new Date()} 
-        show={stage === 'countdown'} 
+        startTime={startTime}
+        show={true}
       />
-    </div>
-  );
+    )}
+
+  </div>
+);
+
 }

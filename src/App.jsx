@@ -5,7 +5,7 @@ import Home from "./home";
 import Timer from "./timer";
 import CSETimer from "./csetimer";
 import "./App.css";
-import Ecetimer from "./ecetimer";
+import Ecetimer from "./Ece-timer";
 
 function App() {
   return (

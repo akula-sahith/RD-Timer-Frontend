@@ -55,7 +55,7 @@ function Home() {
         </button>
         {/* ECE TIMER */}
         <button
-          onClick={() => navigate("/ece-dept-timer")}
+          onClick={() => navigate("/ecedepttimer")}
           className="relative px-10 py-4 text-xl md:text-2xl font-bold text-white bg-transparent border-2 border-green-500 rounded-full overflow-hidden transition-all duration-300 hover:border-green-300 hover:shadow-[0_0_30px_rgba(34,197,94,0.6)] cursor-pointer group"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"></div>

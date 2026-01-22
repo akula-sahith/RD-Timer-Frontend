@@ -1,8 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play } from 'lucide-react';
 import intro from "./assets/video.mp4";
+import ad1 from "./assets/add1.mp4";
+import ad2 from "./assets/add2.mp4";
+import ad3 from "./assets/add3.mp4";
+import ad4 from "./assets/add4.mp4";
 import socket from "./socket";
 import header from "./assets/header.png";
+
+// Ad videos array
+const AD_VIDEOS = [ad1, ad2, ad3, ad4];
+const AD_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 // --- CELEBRATION COMPONENT ---
 function CelebrationActivated({ show }) {
@@ -138,7 +146,7 @@ function CelebrationActivated({ show }) {
 }
 
 
-// --- INTRO ANIMATION (Your Original) ---
+// --- INTRO ANIMATION ---
 function IntroAnimation({ onFinish, show }) {
   const videoRef = useRef(null);
   
@@ -167,33 +175,67 @@ function IntroAnimation({ onFinish, show }) {
   );
 }
 
-// --- NEW CIRCULAR TIMER COMPONENT (Omnitrix Style + Codefusion Logic) ---
-function Countdown({ startTime, show }) {
-  // We store numbers now to drive the circles, not just a text string
+// --- AD BREAK COMPONENT ---
+function AdBreak({ videoSrc, show, onFinish }) {
+  const videoRef = useRef(null);
+  
+  useEffect(() => {
+    if (show && videoRef.current) {
+      videoRef.current.play().catch(err => console.log('Ad video play failed:', err));
+    }
+  }, [show]);
+
+  return (
+    <div 
+      className={`fixed inset-0 z-50 transition-opacity duration-1000 ${
+        show ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}
+    >
+      <video
+        ref={videoRef}
+        onEnded={onFinish}
+        className="w-full h-full object-cover bg-black"
+        playsInline
+        muted
+      >
+        <source src={videoSrc} type="video/mp4" />
+      </video>
+      
+      {/* Ad indicator */}
+      <div className="absolute top-4 right-4 bg-black/70 text-cyan-400 px-4 py-2 rounded-full text-sm font-semibold border border-cyan-500/50">
+        <span style={{ fontFamily: 'Orbitron, monospace', letterSpacing: '0.05em' }}>AD BREAK</span>
+      </div>
+    </div>
+  );
+}
+
+// --- CIRCULAR TIMER COMPONENT ---
+function Countdown({ startTime, show, onAdBreak }) {
   const [timeLeft, setTimeLeft] = useState({ hrs: 0, mins: 0, secs: 0 });
   const [isEnded, setIsEnded] = useState(false);
-  const [displayStartTime, setDisplayStartTime] = useState('');
-  const [displayEndTime, setDisplayEndTime] = useState('');
+  const lastAdCheckRef = useRef(0);
 
-  // Circle Config (Radius 54)
   const CIRCUMFERENCE = 339.292;
 
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
-      // YOUR ORIGINAL LOGIC: Calculate elapsed since start
       const elapsed = now - new Date(startTime).getTime();
-      // YOUR ORIGINAL LOGIC: 24 Hour Countdown
       const remaining = (24 * 60 * 60 * 1000) - elapsed;
 
       if (remaining <= 0) {
         setIsEnded(true);
         setTimeLeft({ hrs: 0, mins: 0, secs: 0 });
-        // Optional: Do not return here if you want it to sit at 00:00:00
         return;
       }
 
-      // Calculate units for the circles
+      // Check for ad break every 15 minutes
+      const currentAdSlot = Math.floor(elapsed / AD_INTERVAL);
+      if (currentAdSlot > lastAdCheckRef.current && currentAdSlot < AD_VIDEOS.length) {
+        lastAdCheckRef.current = currentAdSlot;
+        onAdBreak(currentAdSlot);
+      }
+
       const hrs = Math.floor(remaining / 3600000);
       const mins = Math.floor((remaining % 3600000) / 60000);
       const secs = Math.floor((remaining % 60000) / 1000);
@@ -202,9 +244,8 @@ function Countdown({ startTime, show }) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [startTime]);
+  }, [startTime, onAdBreak]);
 
-  // Helper to animate the SVG stroke
   const calculateOffset = (value, maxValue) => {
     const progress = value / maxValue;
     return CIRCUMFERENCE - (CIRCUMFERENCE * progress);
@@ -218,18 +259,16 @@ function Countdown({ startTime, show }) {
     >
       <div className="relative z-10 w-full flex flex-col items-center justify-center min-h-screen gap-6 p-4">
         
-        {/* Header - Omnitrix Style */}
+        {/* Header */}
         <div className="space-y-4 text-center">
-       <img
-    src={header}
-    alt="CODEFUSION 2026"
-    className="
-      ml-6 md:ml-10 lg:ml-14
-      w-[360px] md:w-[560px] lg:w-[760px]
-    "
-  />
-
-
+          <img
+            src={header}
+            alt="CODEFUSION 2026"
+            className="
+              ml-6 md:ml-10 lg:ml-14
+              w-[360px] md:w-[560px] lg:w-[760px]
+            "
+          />
 
           <div className="h-1 w-24 md:w-32 mx-auto bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
         </div>
@@ -237,7 +276,6 @@ function Countdown({ startTime, show }) {
         {/* Circular Timers Container */}
         <div className="flex flex-wrap justify-center gap-4 md:gap-8 lg:gap-16 items-center mt-8 md:mt-12">
           
-          {/* SVG Definition for the Gradient (Blue/Cyan to match Codefusion) */}
           <svg width="0" height="0">
             <defs>
               <linearGradient id="codefusion-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -316,7 +354,7 @@ function Countdown({ startTime, show }) {
         )}
       </div>
 
-      {/* Fullscreen Toggle Button - Omnitrix Style */}
+      {/* Fullscreen Toggle Button */}
       <button
         onClick={() => {
           if (document.fullscreenElement) {
@@ -331,7 +369,6 @@ function Countdown({ startTime, show }) {
         title={document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen"}
       >
         {!document.fullscreenElement ? (
-          /* ENTER FULLSCREEN ICON */
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="28"
@@ -350,7 +387,6 @@ function Countdown({ startTime, show }) {
             <path d="M3 16v3a2 2 0 0 0 2 2h3" />
           </svg>
         ) : (
-          /* EXIT FULLSCREEN ICON */
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="28"
@@ -371,8 +407,6 @@ function Countdown({ startTime, show }) {
         )}
       </button>
 
-
-      {/* STYLES FROM OMNITRIX TIMER (ADAPTED) */}
       <style jsx>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&display=swap');
         
@@ -466,8 +500,7 @@ function Countdown({ startTime, show }) {
   );
 }
 
-// --- START SCREEN (Your Original) ---
-
+// --- START SCREEN ---
 function StartScreen({ onStart }) {
   const particles = React.useMemo(() => 
     [...Array(50)].map((_, i) => ({
@@ -515,10 +548,8 @@ function StartScreen({ onStart }) {
         </div>
 
         <div className="group relative inline-block">
-          {/* Transparent glow background */}
           <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-2xl group-hover:from-cyan-500/40 group-hover:to-blue-500/40 transition-all duration-300"></div>
           
-          {/* Button */}
           <button
             onClick={onStart}
             className="relative px-10 py-4 text-xl md:text-2xl font-bold text-white bg-transparent border-2 border-cyan-500 rounded-full overflow-hidden transition-all duration-300 hover:border-cyan-300 hover:shadow-[0_0_30px_rgba(34,211,238,0.6)] cursor-pointer"
@@ -534,53 +565,61 @@ function StartScreen({ onStart }) {
   );
 }
 
-// --- MAIN APP (Your Original Logic) ---
+// --- MAIN APP ---
 export default function App() {
-  const [stage, setStage] = useState('start'); // 'start', 'intro', 'celebration', 'countdown'
-  const [startTime, setStartTime] = useState(null);
+  const CELEBRATION_DURATION = 4000; // 4 seconds celebration
+  
+  const [stage, setStage] = useState('start'); // 'start', 'intro', 'celebration', 'ad', 'countdown'
+  const [rawStartTime, setRawStartTime] = useState(null);
+  const [countdownStartTime, setCountdownStartTime] = useState(null);
+  const [currentAdIndex, setCurrentAdIndex] = useState(0);
 
-  // Single useEffect for all socket listeners
+  // Socket listeners
   useEffect(() => {
-    // Connection event
     socket.emit("join-room", "it");
 
-    // Start event - triggers intro animation
     socket.on("START_EVENT", ({ startTime }) => {
       console.log("🔥 START_EVENT received", startTime);
-      setStartTime(new Date(startTime));
+      const backendTime = new Date(startTime);
+      
+      setRawStartTime(backendTime);
+      setCountdownStartTime(
+        new Date(backendTime.getTime() + CELEBRATION_DURATION)
+      );
       setStage("intro");
     });
 
-    // Sync event - for clients joining after start
     socket.on("SYNC_RUNNING", ({ startTime }) => {
       console.log("🔄 SYNC_RUNNING received", startTime);
-      setStartTime(new Date(startTime));
+      const backendTime = new Date(startTime);
+      
+      setRawStartTime(backendTime);
+      setCountdownStartTime(
+        new Date(backendTime.getTime() + CELEBRATION_DURATION)
+      );
       setStage("countdown");
     });
 
-    // Reset event - returns to start screen
     socket.on("RESET_EVENT", () => {
       console.log("🔄 RESET_EVENT received");
       setStage("start");
-      setStartTime(null);
+      setRawStartTime(null);
+      setCountdownStartTime(null);
+      setCurrentAdIndex(0);
     });
 
-    // Cleanup all listeners on unmount
     return () => {
       socket.off("connect");
       socket.off("START_EVENT");
       socket.off("SYNC_RUNNING");
       socket.off("RESET_EVENT");
     };
-  }, []);
+  }, [CELEBRATION_DURATION]);
 
   const handleStart = () => {
     console.log("▶️ Start clicked");
-
-    // Emit the correct event name that matches backend
     socket.emit("START_REQUEST","it");
 
-    // Request fullscreen
     document.documentElement.requestFullscreen().catch(err => {
       console.log("Fullscreen blocked:", err);
     });
@@ -594,36 +633,53 @@ export default function App() {
     setStage('countdown');
   };
 
-  // Auto-transition from celebration after 8 seconds (2 sec pause + 6 sec animation)
+  const handleAdBreak = (adSlot) => {
+    console.log("📺 Ad break triggered:", adSlot);
+    setCurrentAdIndex(adSlot);
+    setStage('ad');
+  };
+
+  const handleAdFinish = () => {
+    console.log("📺 Ad finished, returning to countdown");
+    setStage('countdown');
+  };
+
+  // Auto-transition from celebration
   useEffect(() => {
     if (stage === 'celebration') {
-      const timer = setTimeout(handleCelebrationFinish, 4000);
+      const timer = setTimeout(handleCelebrationFinish, CELEBRATION_DURATION);
       return () => clearTimeout(timer);
     }
-  }, [stage]);
+  }, [stage, CELEBRATION_DURATION]);
 
   return (
-  <div className="w-screen h-screen overflow-hidden">
-    
-    {stage === 'start' && <StartScreen onStart={handleStart} />}
+    <div className="w-screen h-screen overflow-hidden">
+      
+      {stage === 'start' && <StartScreen onStart={handleStart} />}
 
-    <IntroAnimation 
-      show={stage === 'intro'} 
-      onFinish={handleIntroFinish} 
-    />
-
-    <CelebrationActivated 
-      show={stage === 'celebration'} 
-    />
-
-    {stage === 'countdown' && startTime && (
-      <Countdown 
-        startTime={startTime}
-        show={true}
+      <IntroAnimation 
+        show={stage === 'intro'} 
+        onFinish={handleIntroFinish} 
       />
-    )}
 
-  </div>
-);
+      <CelebrationActivated 
+        show={stage === 'celebration'} 
+      />
 
+      <AdBreak
+        videoSrc={AD_VIDEOS[currentAdIndex]}
+        show={stage === 'ad'}
+        onFinish={handleAdFinish}
+      />
+
+      {(stage === 'countdown') && countdownStartTime && (
+        <Countdown 
+          startTime={countdownStartTime}
+          show={stage === 'countdown'}
+          onAdBreak={handleAdBreak}
+        />
+      )}
+
+    </div>
+  );
 }

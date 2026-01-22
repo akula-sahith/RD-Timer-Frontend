@@ -175,30 +175,54 @@ function IntroAnimation({ onFinish, show }) {
   );
 }
 
-// --- AD BREAK COMPONENT ---
+// --- AD BREAK COMPONENT (FIXED) ---
 function AdBreak({ videoSrc, show, onFinish }) {
   const videoRef = useRef(null);
+  const hasPlayedRef = useRef(false);
 
   useEffect(() => {
     if (show && videoRef.current) {
       const video = videoRef.current;
-      video.currentTime = 0;   // ⬅️ reset
-      video.loop = false;      // ⬅️ NO LOOP
-      video.play().catch(() => {});
+      
+      // Reset the video completely
+      video.pause();
+      video.currentTime = 0;
+      hasPlayedRef.current = false;
+      
+      // Play the video
+      video.play().catch((err) => {
+        console.log('Ad video play failed:', err);
+      });
     }
   }, [show, videoSrc]);
 
   const handleEnded = () => {
+    if (hasPlayedRef.current) return; // Prevent multiple calls
+    
+    hasPlayedRef.current = true;
     const video = videoRef.current;
+    
     if (video) {
       video.pause();
       video.currentTime = 0;
     }
-    onFinish(); // ⬅️ return to countdown
+    
+    onFinish(); // Return to countdown
   };
 
+  // Also handle when video is not showing - pause it
+  useEffect(() => {
+    if (!show && videoRef.current) {
+      const video = videoRef.current;
+      video.pause();
+      video.currentTime = 0;
+    }
+  }, [show]);
+
+  if (!show) return null;
+
   return (
-    <div className={`fixed inset-0 z-50 ${show ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+    <div className="fixed inset-0 z-50 opacity-100">
       <video
         ref={videoRef}
         onEnded={handleEnded}

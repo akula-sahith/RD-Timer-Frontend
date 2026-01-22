@@ -9,72 +9,50 @@ function CelebrationActivated({ show }) {
 
   return (
     <div className="celebration-overlay">
-      <div className="celebration-frame">
-        {/* Confetti - Now varying shapes and sizes for better visual */}
-        {[...Array(150)].map((_, i) => {
-          const randomX = Math.random() * 400 - 200;
-          const randomRotate = Math.random() * 1080;
-          const size = Math.random() * 10 + 6; // Size between 6px and 16px
-          const isCircle = Math.random() > 0.6; // 40% chance of being a circle
-          const opacity = Math.random() * 0.5 + 0.5; // Varying opacity for depth
+      {/* Confetti */}
+      {[...Array(50)].map((_, i) => (
+        <span
+          key={i}
+          className="confetti"
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random()}s`,
+            background: Math.random() > 0.5 ? "#3b82f6" : "#22d3ee"
+          }}
+        />
+      ))}
 
-          return (
-            <div
-              key={`confetti-${i}`}
-              className="confetti"
-              style={{
-                left: `${Math.random() * 100}%`,
-                width: `${size}px`,
-                height: `${size}px`,
-                borderRadius: isCircle ? '50%' : '3px',
-                opacity: opacity,
-                animationDelay: `${Math.random() * 2.5}s`,
-                animationDuration: `${3.5 + Math.random() * 4}s`,
-                "--random-x": randomX,
-                "--random-rotate": randomRotate,
-              }}
-            />
-          );
-        })}
+      {/* Sparkles */}
+      {[...Array(25)].map((_, i) => (
+        <span
+          key={`s-${i}`}
+          className="sparkle"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random()}s`
+          }}
+        />
+      ))}
 
-        {/* Sparkles - Updated to blue */}
-        {[...Array(70)].map((_, i) => (
-          <div
-            key={`sparkle-${i}`}
-            className="sparkle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              transform: `scale(${Math.random()})`, // Slight starting size variation
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${1 + Math.random() * 2}s`,
-            }}
-          />
-        ))}
-
-        {/* Center Message - Updated to Blue Theme */}
-        <div className="success-message">
-          <div className="success-icon">✓</div>
-          <h2 className="success-title">CODEFUSION ACTIVATED</h2>
-          <p className="success-subtitle">Timer Started Successfully</p>
-        </div>
+      {/* Center Message */}
+      <div className="success-box">
+        <div className="success-icon">✓</div>
+        <h2>CODEFUSION ACTIVATED</h2>
+        <p>Timer Started</p>
       </div>
 
-      {/* CSS STYLES */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
-
         .celebration-overlay {
           position: fixed;
           inset: 0;
+          background: rgba(0,0,20,0.92);
           z-index: 9999;
-          background: rgba(0, 10, 30, 0.9); /* Darker blue-black background */
-          backdrop-filter: blur(10px);
           display: flex;
           align-items: center;
           justify-content: center;
-          animation: fadeIn 0.5s ease-out;
-          font-family: 'Orbitron', sans-serif; /* Ensure font matches */
+          overflow: hidden;
+          animation: fadeIn 0.3s ease-out;
         }
 
         @keyframes fadeIn {
@@ -82,120 +60,82 @@ function CelebrationActivated({ show }) {
           to { opacity: 1; }
         }
 
-        .celebration-frame {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          /* Radial gradient for depth centered on the message */
-          background: radial-gradient(circle at center, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
-        }
-
-        /* Confetti - Blue/Cyan Gradients */
+        /* Confetti */
         .confetti {
           position: absolute;
-          top: -50px;
-          /* Width/Height/Border-radius handled by inline styles now */
-          background: linear-gradient(135deg, #3b82f6, #22d3ee); /* Blue to Cyan */
-          box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); /* Blue glow */
-          animation: confettiFall ease-out forwards;
-          will-change: transform, opacity;
+          top: -10px;
+          width: 8px;
+          height: 8px;
+          border-radius: 2px;
+          animation: fall 2.8s linear forwards;
+          will-change: transform;
         }
 
-        @keyframes confettiFall {
-          0% {
-            transform: translateX(0) rotate(0deg) scale(0.8);
-          }
-          100% {
-            transform:
-              translateX(calc(var(--random-x) * 2px)) /* Increased spread slightly */
-              rotate(calc(var(--random-rotate) * 1deg))
-              scale(1);
-            top: 110%;
+        @keyframes fall {
+          to {
+            transform: translateY(110vh) rotate(360deg);
+            opacity: 0;
           }
         }
 
-        /* Sparkle - Blue */
+        /* Sparkles */
         .sparkle {
           position: absolute;
           width: 4px;
           height: 4px;
-          background: #60a5fa; /* Bright Blue */
           border-radius: 50%;
-          animation: sparkle-pulse 2s ease-in-out infinite;
-          box-shadow: 0 0 15px rgba(96, 165, 250, 0.9); /* Bright blue glow */
+          background: #60a5fa;
+          animation: sparkle 1.8s ease-in-out infinite;
         }
 
-        @keyframes sparkle-pulse {
-          0%,100% { transform: scale(0); opacity: 0; }
-          50% { transform: scale(2.5); opacity: 1; } /* Slightly larger pulse */
+        @keyframes sparkle {
+          0%,100% { opacity: 0; transform: scale(0); }
+          50% { opacity: 1; transform: scale(2); }
         }
 
-        /* Center Success */
-        .success-message {
+        /* Center Box */
+        .success-box {
           z-index: 10;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 1.5rem;
-          animation: zoomInEnrty 0.8s cubic-bezier(.34,1.56,.64,1), holdPause 2s ease-in-out 0.8s;
+          text-align: center;
+          font-family: 'Orbitron', monospace;
+          animation: zoomIn 0.5s ease-out;
         }
 
-        @keyframes zoomInEnrty {
-          from { transform: scale(0.5); opacity: 0; filter: blur(10px); }
-          to { transform: scale(1); opacity: 1; filter: blur(0); }
-        }
-
-        @keyframes holdPause {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1); opacity: 1; }
+        @keyframes zoomIn {
+          from { transform: scale(0.6); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
         }
 
         .success-icon {
-          width: 120px;
-          height: 120px;
+          width: 90px;
+          height: 90px;
+          margin: auto;
           border-radius: 50%;
-          /* Blue to Cyan Gradient */
-          background: linear-gradient(135deg, #2563eb, #22d3ee);
+          background: linear-gradient(135deg,#2563eb,#22d3ee);
           color: white;
-          font-size: 4.5rem;
+          font-size: 3rem;
           display: flex;
           align-items: center;
           justify-content: center;
-          /* Strong Blue Shadow */
-          box-shadow: 0 0 60px rgba(59, 130, 246, 0.7), inset 0 0 20px rgba(255,255,255,0.3);
-          animation: iconPulse 2s infinite ease-in-out;
-          border: 3px solid rgba(255,255,255,0.1);
         }
 
-        @keyframes iconPulse {
-          0%,100% { transform: scale(1); box-shadow: 0 0 60px rgba(59, 130, 246, 0.7); }
-          50% { transform: scale(1.05); box-shadow: 0 0 80px rgba(59, 130, 246, 0.9); }
+        .success-box h2 {
+          margin-top: 1rem;
+          font-size: 2rem;
+          color: white;
+          letter-spacing: 0.12em;
         }
 
-        .success-title {
-          font-size: 3.5rem;
-          font-weight: 800;
-          letter-spacing: 0.15em;
-          color: #ffffff;
-          /* Blue text shadow glow */
-          text-shadow: 0 0 40px rgba(59, 130, 246, 0.8), 0 0 10px rgba(59, 130, 246, 0.8);
-          text-align: center;
-        }
-
-        .success-subtitle {
-          font-size: 1.5rem;
-          color: #93c5fd; /* Light blue text */
-          text-align: center;
-          letter-spacing: 0.05em;
+        .success-box p {
+          margin-top: 0.4rem;
+          font-size: 1rem;
+          color: #93c5fd;
         }
       `}</style>
     </div>
   );
 }
+
 
 // --- INTRO ANIMATION (Your Original) ---
 function IntroAnimation({ onFinish, show }) {
@@ -656,7 +596,7 @@ export default function App() {
   // Auto-transition from celebration after 8 seconds (2 sec pause + 6 sec animation)
   useEffect(() => {
     if (stage === 'celebration') {
-      const timer = setTimeout(handleCelebrationFinish, 8000);
+      const timer = setTimeout(handleCelebrationFinish, 3000);
       return () => clearTimeout(timer);
     }
   }, [stage]);
